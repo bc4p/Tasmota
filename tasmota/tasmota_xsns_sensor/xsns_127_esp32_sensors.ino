@@ -64,7 +64,17 @@ void Esp32SensorShow(bool json) {
       if (!ResponseContains_P(PSTR(D_JSON_TEMPERATURE))) {
         UpdateGlobalTemperature(c);
       }
+      //ResponseAppend_P(PSTR(",\"Temperature ESP32\": %f"), t);  => Only difference is resolution
+
       ResponseAppend_P(PSTR(",\"ESP32\":{\"" D_JSON_TEMPERATURE "\":%*_f"), Settings->flag2.temperature_resolution, &t);
+      uint8_t* pointerSignature=CreateSignatureForFloat(t);
+      printSignatureFromPointer(pointerSignature);
+
+      //Doesn't work because string is too long
+      //String signatureTemperature;
+      //signatureTemperature=CreateSignatureString(t);
+      //ResponseAppend_P(PSTR("},\"Signature\": %s"), signatureTemperature);
+
       json_end = true;
 
 #ifdef USE_DOMOTICZ
@@ -79,6 +89,7 @@ void Esp32SensorShow(bool json) {
 
 #ifdef USE_WEBSERVER
     } else {
+      //Comment out to check on temperature reading effect => No effect
       WSContentSend_Temp("ESP32", t);
 #endif  // USE_WEBSERVER
     }
