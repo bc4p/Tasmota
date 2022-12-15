@@ -1173,9 +1173,26 @@ void EnergyShow(bool json) {
   if (json) {
     bool show_energy_period = (0 == TasmotaGlobal.tele_period);
 
+    char* totalEnergyString=EnergyFormat(value_chr, Energy.total, Settings->flag2.energy_resolution, 2);
+    //TasmotaGlobal.mqtt_data
+    //char timestr[100];
+    //TasmotaGlobal.mqtt_data = ResponseGetTime(Settings->flag2.time_format, timestr);
+
+    uint8_t* message=CreateSignatureForString(totalEnergyString);
+    printSignatureFromPointer(message);
+
     ResponseAppend_P(PSTR(",\"" D_RSLT_ENERGY "\":{\"" D_JSON_TOTAL_START_TIME "\":\"%s\",\"" D_JSON_TOTAL "\":%s"),
       GetDateAndTime(DT_ENERGY).c_str(),
-      EnergyFormat(value_chr, Energy.total, Settings->flag2.energy_resolution, 2));
+      totalEnergyString);
+
+
+    /* Werkt niet:
+    const char* DateAndTime=GetDateAndTime(DT_LOCAL).c_str();
+    for(int i=0;i<strlen(DateAndTime);i++){
+        msg[i]=DateAndTime[i];
+        ResponseAppend_P(PSTR("%c"),msg[i]);
+    }*/
+
 
     if (energy_tariff) {
       ResponseAppend_P(PSTR(",\"" D_JSON_TOTAL D_CMND_TARIFF "\":%s"),
