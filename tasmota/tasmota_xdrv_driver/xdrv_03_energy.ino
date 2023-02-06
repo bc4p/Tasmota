@@ -1180,6 +1180,7 @@ void EnergyShow(bool json) {
 
     uint8_t* message=CreateSignatureForString(totalEnergyString);
     printSignatureFromPointer(message);
+    printPublicKeyJson();
 
     ResponseAppend_P(PSTR(",\"" D_RSLT_ENERGY "\":{\"" D_JSON_TOTAL_START_TIME "\":\"%s\",\"" D_JSON_TOTAL "\":%s"),
       GetDateAndTime(DT_ENERGY).c_str(),

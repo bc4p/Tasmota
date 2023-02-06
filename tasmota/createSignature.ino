@@ -1,10 +1,11 @@
 #include <Ed25519.h>
-
+/* Moved to main
 uint8_t privateKey[32];
 uint8_t publicKey[32];
 uint8_t signature[64];
+//const bool keypairGenerated[] PROGMEM={false};
 bool keypairGenerated=false;
-
+*/
 
 
 String convertToString(uint8_t* a, size_t len)
@@ -17,7 +18,7 @@ String convertToString(uint8_t* a, size_t len)
     return s;
 }
 
-char* getTimeAndDateOutOfJson(){
+/*void getTimeAndDateOutOfJson(char* msg){
     size_t beginTimeJson=9;
     size_t endTimeJson=28;
     char msg[endTimeJson-beginTimeJson];
@@ -26,18 +27,19 @@ char* getTimeAndDateOutOfJson(){
         msg[i]=TasmotaGlobal.mqtt_data[i+beginTimeJson];
         ResponseAppend_P(PSTR("%c"),msg[i]);
     }
-    return msg;
-}
+}*/
 
 uint8_t* CreateSignatureForFloat(float floatNumber){
     size_t N=sizeof(floatNumber);
     uint8_t message[N];
     uint8_t *floatNumberArray;
-    if(!keypairGenerated){
-        Ed25519::generatePrivateKey(privateKey);
-        Ed25519::derivePublicKey(publicKey, privateKey);
-        keypairGenerated=true;
-    }
+    //if(!pgm_read_byte(keypairGenerated)){
+        //Ed25519::generatePrivateKey(privateKey);
+        //Ed25519::derivePublicKey(publicKey, privateKey);
+        //keypairGenerated=true; //Moet in Flash gebeuren
+        //const bool overwrite[]={true};
+        //memcpy_P(keypairGenerated,overwrite,1);
+    //}
     floatNumberArray = reinterpret_cast<uint8_t*>(&floatNumber); //0=end, 3=begin, so 3 2 1 0 forms binary representation
     for(int i=0;i<N;i++){
         message[i]=floatNumberArray[i];
@@ -47,12 +49,14 @@ uint8_t* CreateSignatureForFloat(float floatNumber){
 }
 
 uint8_t* CreateSignatureForString(char* stringPointer){
-    //Generating keys
-    if(!keypairGenerated){
+    //Generating keys => moved to setup/main
+    /*if(!keypairGenerated){
         Ed25519::generatePrivateKey(privateKey);
         Ed25519::derivePublicKey(publicKey, privateKey);
-        keypairGenerated=true;
-    }
+        keypairGenerated=true; //Moet in Flash gebeuren
+        //const bool overwrite[]={true};
+        //memcpy_P(keypairGenerated,overwrite,1);
+    }*/
 
     //Getting timestamp
     size_t beginTimeJson=9;
@@ -102,4 +106,12 @@ void printSignatureFromPointer(uint8_t* signaturePointer){
     }
     ResponseAppend_P(PSTR("}"));
 
+}
+
+void printPublicKeyJson(){
+    ResponseAppend_P(PSTR(",\"PublicKey\": {"));
+    for(int i=0;i<sizeof(publicKey);i++){
+        ResponseAppend_P(PSTR("%02x"),publicKey[i]);
+    }
+    ResponseAppend_P(PSTR("}"));
 }
