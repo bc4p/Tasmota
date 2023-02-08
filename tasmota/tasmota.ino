@@ -19,11 +19,15 @@
 #include <Ed25519.h>
 #include <EEPROM.h>
 uint8_t privateKey[32];
-
-//const uint8_t privateKeyFlash[32] PROGMEM = {2,1,2,3,45,56,8,52,2,23};
-
 uint8_t publicKey[32];
 uint8_t signature[64];
+//PROGMEM not possible => read-only
+
+//DEBUG:
+uint8_t privateKeyCopy[32];
+uint8_t publicKeyCopy[32];
+uint8_t publicKeyCopy2[32];
+bool checkKeys;
 
 // Location specific includes
 #ifndef ESP32_STAGE                         // ESP32 Stage has no core_version.h file. Disable include via PlatformIO Option
@@ -663,35 +667,61 @@ void setup(void) {
     REASON_DEEP_SLEEP_AWAKE = 5,  // "Deep-Sleep Wake"         wake up from deep-sleep
     REASON_EXT_SYS_RST      = 6   // "External System"         external system reset
   */
-  EEPROM.begin(sizeof(publicKey)+sizeof(privateKey)); //necessary
+  EEPROM.begin(512+sizeof(publicKey)+sizeof(privateKey)); //necessary
   //memcpy_P(publicKey,publicKeyFlash,sizeof(publicKey));
+
+  int offset = 512;
   for(int i=0; i<sizeof(privateKey);i++){
-    privateKey[i]=EEPROM.read(i);
+    privateKey[i]=EEPROM.read(offset+i);
   }
-  for(int i=sizeof(privateKey); i<sizeof(privateKey)+sizeof(publicKey);i++){
-    publicKey[i]=EEPROM.read(i);
+  for(int i=0; i<sizeof(publicKey);i++){
+    publicKey[i]=EEPROM.read(offset+sizeof(privateKey)+i);
+    //EEPROM.get(offset+i,publicKey[i]);
   }
+
+/*
+  for(int i=0; i<sizeof(privateKey);i++){
+      privateKeyCopy[i]=privateKey[i];
+    }
+
+  for(int i=0; i<sizeof(publicKey);i++){
+      publicKeyCopy[i]=publicKey[i];
+    }
+*/
+
   uint8_t derivedPublicKey[32];
   Ed25519::derivePublicKey(derivedPublicKey, privateKey);
 
+/*
+  for(int i=0; i<sizeof(derivedPublicKey);i++){
+      publicKeyCopy2[i]=derivedPublicKey[i];
+    }
+*/
+
   bool keysMatch=true;
-  for(int i=0;i<sizeof(privateKey);i++){
+  for(int i=0;i<sizeof(publicKey);i++){
     if(derivedPublicKey[i]!=publicKey[i]){
         keysMatch=false;
     }
   }
 
+  //checkKeys=keysMatch;
+
   if(!keysMatch) {
     Ed25519::generatePrivateKey(privateKey);
     Ed25519::derivePublicKey(publicKey, privateKey);
     for(int i=0; i<sizeof(privateKey);i++){
-      EEPROM.write(i,privateKey[i]);
+      EEPROM.write(offset+i,privateKey[i]);
+      //EEPROM.commit();
     }
-    for(int i=sizeof(privateKey); i<sizeof(privateKey)+sizeof(publicKey);i++){
-      EEPROM.write(i,publicKey[i]);
+    for(int i=0; i<sizeof(publicKey);i++){
+      EEPROM.write(offset+sizeof(privateKey)+i,publicKey[i]);
+      //EEPROM.commit();
     }
   }
-  
+
+  EEPROM.commit();
+  EEPROM.end();
 
 }
 
