@@ -1,4 +1,5 @@
 #include <Ed25519.h>
+
 /* Moved to main
 uint8_t privateKey[32];
 uint8_t publicKey[32];
@@ -81,12 +82,13 @@ uint8_t* CreateSignatureForString(char* stringPointer){
         message[i]=stringPointer[i-lengthTimestamp-1];
     }
     //Printing message on which signature is calculated (debug purposes)
+    /*
     ResponseAppend_P(PSTR(", \"Calculating signature on\": \""));
     for(int i=0;i<N;i++){
         ResponseAppend_P(PSTR("%c"),message[i]);
     }
     ResponseAppend_P(PSTR("\""));
-
+    */
 
 
     Ed25519::sign(signature, privateKey, publicKey, message, N);
@@ -99,6 +101,7 @@ String CreateSignatureString(float floatNumber){
     return signatureString;
 }
 
+
 void printSignatureFromPointer(uint8_t* signaturePointer){
     ResponseAppend_P(PSTR(",\"Signature\": {"));
     for(int i=0;i<64;i++){
@@ -108,10 +111,53 @@ void printSignatureFromPointer(uint8_t* signaturePointer){
 
 }
 
+
+
+//DEBUG PRINTS:
 void printPublicKeyJson(){
     ResponseAppend_P(PSTR(",\"PublicKey\": {"));
     for(int i=0;i<sizeof(publicKey);i++){
         ResponseAppend_P(PSTR("%02x"),publicKey[i]);
     }
     ResponseAppend_P(PSTR("}"));
+}
+
+void printPrivateKeyJson(){
+    ResponseAppend_P(PSTR(",\"PrivateKey\": {"));
+    for(int i=0;i<sizeof(publicKey);i++){
+        ResponseAppend_P(PSTR("%02x"),privateKey[i]);
+    }
+    ResponseAppend_P(PSTR("}"));
+}
+
+void printDerivedPublicKeyJson(){
+    ResponseAppend_P(PSTR(",\"DerivedKey\": {"));
+    for(int i=0;i<sizeof(publicKey);i++){
+        ResponseAppend_P(PSTR("%02x"),publicKeyCopy2[i]);
+    }
+    ResponseAppend_P(PSTR(", %d, %d}"),checkKeys,sizeof(EEPROM));
+}
+
+void printPublicKeyCopyJson(){
+    ResponseAppend_P(PSTR(",\"PublicKeyBeforeGen\": {"));
+    for(int i=0;i<sizeof(publicKey);i++){
+        ResponseAppend_P(PSTR("%02x"),publicKeyCopy[i]);
+    }
+    ResponseAppend_P(PSTR("}"));
+}
+
+void printPrivateKeyCopyJson(){
+    ResponseAppend_P(PSTR(",\"PrivateKeyBeforeGen\": {"));
+    for(int i=0;i<sizeof(publicKey);i++){
+        ResponseAppend_P(PSTR("%02x"),privateKeyCopy[i]);
+    }
+    ResponseAppend_P(PSTR("}"));
+}
+
+void printKeysJson(){
+    printPublicKeyJson();
+    printPublicKeyCopyJson();
+    printDerivedPublicKeyJson();
+    printPrivateKeyCopyJson();
+    printPrivateKeyJson();
 }

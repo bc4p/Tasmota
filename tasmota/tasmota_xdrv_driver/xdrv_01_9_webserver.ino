@@ -388,7 +388,7 @@ const char HTTP_COUNTER[] PROGMEM =
   "<br><div id='t' style='text-align:center;'></div>";
 
 const char HTTP_END[] PROGMEM =
-  "<div style='text-align:right;font-size:11px;'><hr/><a href='https://bit.ly/tasmota' target='_blank' style='color:#aaa;'>Tasmota %s " D_BY " Theo Arends</a></div>"
+  "<div style='text-align:right;font-size:11px;'><hr/><a href='https://github.com/bc4p/tasmota' target='_blank' style='color:#aaa;'>BC4P Custom Tasmota %s " D_BY " BC4P Team </a></div>"
   "</div>"
   "</body>"
   "</html>";
@@ -2341,7 +2341,10 @@ void HandleInformation(void)
   }
   //Show public key
 
-  WSContentSend_P(PSTR("}1" D_PUBLIC_KEY "}2%02x%02x%02x%02x"), publicKey[0],publicKey[1],publicKey[2],publicKey[3]);
+  WSContentSend_P(PSTR("}1" D_PUBLIC_KEY "}2"));
+  for(int i=0;i<sizeof(publicKey);i++){
+    WSContentSend_P(PSTR("%02x"), publicKey[i]);
+  }
 
   WSContentSend_P(PSTR("}1}2&nbsp;"));  // Empty line
   bool show_hr = false;
