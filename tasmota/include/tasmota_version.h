@@ -20,7 +20,7 @@
 #ifndef _TASMOTA_VERSION_H_
 #define _TASMOTA_VERSION_H_
 
-const uint32_t VERSION = 0x0C030106;   // 12.3.1.6
-const uint32_t VERSION = 0x01000000;   // New BC4P version 1.0.0.0
+//const uint32_t VERSION = 0x0C030106;   // 12.3.1.6
+const uint32_t VERSION = 0x1C030106;   // New BC4P version (16+12).3.1.6
 
 #endif  // _TASMOTA_VERSION_H_
