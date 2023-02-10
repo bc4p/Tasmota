@@ -17,6 +17,18 @@ String convertToString(uint8_t* a, size_t len)
     return s;
 }
 
+char* getTimeAndDateOutOfJson(){
+    size_t beginTimeJson=9;
+    size_t endTimeJson=28;
+    char msg[endTimeJson-beginTimeJson];
+    //size_t length = (TasmotaGlobal.mqtt_data).copy(msg,endTimeJson-beginTimeJson,beginTimeJson);
+    for(int i=0;i<endTimeJson-beginTimeJson;i++){
+        msg[i]=TasmotaGlobal.mqtt_data[i+beginTimeJson];
+        ResponseAppend_P(PSTR("%c"),msg[i]);
+    }
+    return msg;
+}
+
 uint8_t* CreateSignatureForFloat(float floatNumber){
     size_t N=sizeof(floatNumber);
     uint8_t message[N];
@@ -34,6 +46,49 @@ uint8_t* CreateSignatureForFloat(float floatNumber){
   return signature;
 }
 
+uint8_t* CreateSignatureForString(char* stringPointer){
+    //Generating keys
+    if(!keypairGenerated){
+        Ed25519::generatePrivateKey(privateKey);
+        Ed25519::derivePublicKey(publicKey, privateKey);
+        keypairGenerated=true;
+    }
+
+    //Getting timestamp
+    size_t beginTimeJson=9;
+    size_t endTimeJson=28;
+    size_t lengthTimestamp=endTimeJson-beginTimeJson;
+    char msg[lengthTimestamp];
+    //size_t length = (TasmotaGlobal.mqtt_data).copy(msg,endTimeJson-beginTimeJson,beginTimeJson);
+    for(int i=0;i<lengthTimestamp;i++){
+        msg[i]=TasmotaGlobal.mqtt_data[i+beginTimeJson];
+        //ResponseAppend_P(PSTR("%c"),msg[i]);
+    }
+
+    //Creating the message
+    size_t N=lengthTimestamp+strlen(stringPointer)+1; //Timestamp and value seperated by "," (=>+1)
+    uint8_t message[N];
+
+    for(int i=0;i<lengthTimestamp;i++){
+        message[i]=msg[i];
+    }
+    message[lengthTimestamp]=',';
+    for(int i=lengthTimestamp+1;i<N;i++){
+        message[i]=stringPointer[i-lengthTimestamp-1];
+    }
+    //Printing message on which signature is calculated (debug purposes)
+    ResponseAppend_P(PSTR(", \"Calculating signature on\": \""));
+    for(int i=0;i<N;i++){
+        ResponseAppend_P(PSTR("%c"),message[i]);
+    }
+    ResponseAppend_P(PSTR("\""));
+
+
+
+    Ed25519::sign(signature, privateKey, publicKey, message, N);
+    return signature;
+}
+
 String CreateSignatureString(float floatNumber){
     uint8_t* pointerSignature=CreateSignatureForFloat(floatNumber);
     String signatureString=convertToString(pointerSignature, 64);
@@ -41,9 +96,10 @@ String CreateSignatureString(float floatNumber){
 }
 
 void printSignatureFromPointer(uint8_t* signaturePointer){
-    ResponseAppend_P(PSTR("},\"Signature\": {"));
-    for(int i=0;i<63;i++){
-        ResponseAppend_P(PSTR("%02x "),signaturePointer[i]);
+    ResponseAppend_P(PSTR(",\"Signature\": {"));
+    for(int i=0;i<64;i++){
+        ResponseAppend_P(PSTR("%02x"),signaturePointer[i]);
     }
-    ResponseAppend_P(PSTR("%02x"),signaturePointer[63]);
+    ResponseAppend_P(PSTR("}"));
+
 }
