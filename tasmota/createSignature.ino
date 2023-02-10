@@ -103,11 +103,11 @@ String CreateSignatureString(float floatNumber){
 
 
 void printSignatureFromPointer(uint8_t* signaturePointer){
-    ResponseAppend_P(PSTR(",\"Signature\": {"));
+    ResponseAppend_P(PSTR(",\"Signature\":\""));
     for(int i=0;i<64;i++){
         ResponseAppend_P(PSTR("%02x"),signaturePointer[i]);
     }
-    ResponseAppend_P(PSTR("}"));
+    ResponseAppend_P(PSTR("\""));
 
 }
 
