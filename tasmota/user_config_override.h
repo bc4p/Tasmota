@@ -110,7 +110,7 @@ Examples :
 #undef USE_TIMERS                               // Add support for up to 16 timers (+2k2 code)
   #undef USE_TIMERS_WEB                         // Add timer webpage support (+4k5 code)
   #undef USE_SUNRISE                            // Add support for Sunrise and sunset tools (+16k)
-    #undef SUNRISE_DAWN_ANGLE DAWN_NORMAL       // Select desired Dawn Angle from (DAWN_NORMAL, DAWN_CIVIL, DAWN_NAUTIC, DAWN_ASTRONOMIC)
+    //#undef SUNRISE_DAWN_ANGLE DAWN_NORMAL       // Select desired Dawn Angle from (DAWN_NORMAL, DAWN_CIVIL, DAWN_NAUTIC, DAWN_ASTRONOMIC)
 
     // -- Compression ---------------------------------
 #undef USE_UNISHOX_COMPRESSION                  // Add support for string compression in Rules or Scripts
@@ -193,9 +193,9 @@ Examples :
 
 // -- I2C sensors ---------------------------------
 #undef USE_I2C                                  // I2C using library wire (+10k code, 0k2 mem, 124 iram)
-#undef I2CDRIVERS_0_31        0xFFFFFFFF          // Enable I2CDriver0  to I2CDriver31
-#undef I2CDRIVERS_32_63       0xFFFFFFFF          // Enable I2CDriver32 to I2CDriver63
-#undef I2CDRIVERS_64_95       0xFFFFFFFF          // Enable I2CDriver64 to I2CDriver95
+//#undef I2CDRIVERS_0_31        0xFFFFFFFF          // Enable I2CDriver0  to I2CDriver31
+//#undef I2CDRIVERS_32_63       0xFFFFFFFF          // Enable I2CDriver32 to I2CDriver63
+//#undef I2CDRIVERS_64_95       0xFFFFFFFF          // Enable I2CDriver64 to I2CDriver95
 
     #undef USE_VEML6070_RSET    270000          // VEML6070, Rset in Ohm used on PCB board, default 270K = 270000ohm, range for this sensor: 220K ... 1Meg
     #undef USE_VEML6070_SHOW_RAW                // VEML6070, shows the raw value of UV-A
@@ -241,6 +241,13 @@ Examples :
     #undef IR_RCV_WHILE_SENDING    0            // Turns on receiver while sending messages, i.e. receive your own. This is unreliable and can cause IR timing issues
     #undef IR_RCV_TOLERANCE        25           // Base tolerance percentage for matching incoming IR messages (default 25, max 100)
 
-    
+
+
+//NAME OVERRIDE:
+#undef FRIENDLY_NAME
+#define FRIENDLY_NAME          "BC4P Custom Tasmota"         // [FriendlyName] Friendlyname up to 32 characters used by webpages and Alexa
+
+#define D_PUBLIC_KEY           "Public Key"
+
 
 #endif  // _USER_CONFIG_OVERRIDE_H_

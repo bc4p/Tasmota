@@ -16,6 +16,14 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <Ed25519.h>
+#include <EEPROM.h>
+uint8_t privateKey[32];
+
+//const uint8_t privateKeyFlash[32] PROGMEM = {2,1,2,3,45,56,8,52,2,23};
+
+uint8_t publicKey[32];
+uint8_t signature[64];
 
 // Location specific includes
 #ifndef ESP32_STAGE                         // ESP32 Stage has no core_version.h file. Disable include via PlatformIO Option
@@ -650,6 +658,49 @@ void setup(void) {
 #endif
 
   TasmotaGlobal.rules_flag.system_init = 1;
+
+
+  //Generate keypairs for signature
+/*
+    user_interface.h
+    REASON_DEFAULT_RST      = 0,  // "Power on"                normal startup by power on
+    REASON_WDT_RST          = 1,  // "Hardware Watchdog"       hardware watch dog reset
+    REASON_EXCEPTION_RST    = 2,  // "Exception"               exception reset, GPIO status won’t change
+    REASON_SOFT_WDT_RST     = 3,  // "Software Watchdog"       software watch dog reset, GPIO status won’t change
+    REASON_SOFT_RESTART     = 4,  // "Software/System restart" software restart ,system_restart , GPIO status won’t change
+    REASON_DEEP_SLEEP_AWAKE = 5,  // "Deep-Sleep Wake"         wake up from deep-sleep
+    REASON_EXT_SYS_RST      = 6   // "External System"         external system reset
+  */
+  EEPROM.begin(sizeof(publicKey)+sizeof(privateKey)); //necessary
+  //memcpy_P(publicKey,publicKeyFlash,sizeof(publicKey));
+  for(int i=0; i<sizeof(privateKey);i++){
+    privateKey[i]=EEPROM.read(i);
+  }
+  for(int i=sizeof(privateKey); i<sizeof(privateKey)+sizeof(publicKey);i++){
+    publicKey[i]=EEPROM.read(i);
+  }
+  uint8_t derivedPublicKey[32];
+  Ed25519::derivePublicKey(derivedPublicKey, privateKey);
+
+  bool keysMatch=true;
+  for(int i=0;i<sizeof(privateKey);i++){
+    if(derivedPublicKey[i]!=publicKey[i]){
+        keysMatch=false;
+    }
+  }
+
+  if(!keysMatch) {
+    Ed25519::generatePrivateKey(privateKey);
+    Ed25519::derivePublicKey(publicKey, privateKey);
+    for(int i=0; i<sizeof(privateKey);i++){
+      EEPROM.write(i,privateKey[i]);
+    }
+    for(int i=sizeof(privateKey); i<sizeof(privateKey)+sizeof(publicKey);i++){
+      EEPROM.write(i,publicKey[i]);
+    }
+  }
+  
+
 }
 
 void BacklogLoop(void) {

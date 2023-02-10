@@ -2339,6 +2339,10 @@ void HandleInformation(void)
   for (uint32_t i = 0; i < maxfn; i++) {
     WSContentSend_P(PSTR("}1" D_FRIENDLY_NAME " %d}2%s"), i +1, SettingsText(SET_FRIENDLYNAME1 +i));
   }
+  //Show public key
+
+  WSContentSend_P(PSTR("}1" D_PUBLIC_KEY "}2%02x%02x%02x%02x"), publicKey[0],publicKey[1],publicKey[2],publicKey[3]);
+
   WSContentSend_P(PSTR("}1}2&nbsp;"));  // Empty line
   bool show_hr = false;
   if ((WiFi.getMode() >= WIFI_AP) && (static_cast<uint32_t>(WiFi.softAPIP()) != 0)) {
